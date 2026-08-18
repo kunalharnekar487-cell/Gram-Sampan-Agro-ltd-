@@ -63,11 +63,26 @@ exports.sendRegistrationOTP = async (req, res) => {
       expiresAt: Date.now() + 10 * 60 * 1000,
     });
 
+    let emailSent = false;
+    let emailError = null;
     if (email && process.env.SMTP_EMAIL) {
-      sendOTPEmail(email, otp, name).catch(err => console.error('Email send failed (non-blocking):', err.message));
+      try {
+        await sendOTPEmail(email, otp, name);
+        emailSent = true;
+        console.log(`OTP email sent to ${email}: ${otp}`);
+      } catch (err) {
+        emailError = err.message;
+        console.error('Email send failed:', err.message);
+      }
     }
 
-    res.json({ success: true, message: 'OTP sent successfully', sentTo: email || mobile });
+    res.json({
+      success: true,
+      message: emailSent ? 'OTP sent successfully' : (emailError ? `OTP created but email failed: ${emailError}` : 'OTP created (email not configured)'),
+      sentTo: email || mobile,
+      emailSent,
+      otp: process.env.NODE_ENV === 'development' ? otp : undefined,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

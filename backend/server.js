@@ -42,6 +42,34 @@ app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'Gram Sampan Agro Ltd API is running', timestamp: new Date().toISOString() });
 });
 
+app.get('/api/smtp-status', (req, res) => {
+  res.json({
+    smtpHost: process.env.SMTP_HOST || 'not set',
+    smtpPort: process.env.SMTP_PORT || 'not set',
+    smtpEmail: process.env.SMTP_EMAIL || 'not set',
+    smtpPassword: process.env.SMTP_PASSWORD ? '****configured****' : 'not set',
+    fromEmail: process.env.FROM_EMAIL || 'not set',
+    fromName: process.env.FROM_NAME || 'not set',
+  });
+});
+
+app.post('/api/test-email', async (req, res) => {
+  const { sendEmail } = require('./utils/email');
+  const { to } = req.body;
+  if (!to) return res.status(400).json({ success: false, message: 'Email address required in body: {"to":"email@example.com"}' });
+  try {
+    const info = await sendEmail({
+      email: to,
+      subject: 'Test Email - Gram Sampan Agro Ltd',
+      html: '<h1 style="color:#2E7D32">Email is working!</h1><p>Your SMTP configuration is correct.</p>',
+    });
+    res.json({ success: true, message: 'Test email sent', messageId: info.messageId });
+  } catch (error) {
+    console.error('Test email failed:', error.message);
+    res.status(500).json({ success: false, message: 'Email failed: ' + error.message });
+  }
+});
+
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(err.statusCode || 500).json({ success: false, message: err.message || 'Internal Server Error' });
