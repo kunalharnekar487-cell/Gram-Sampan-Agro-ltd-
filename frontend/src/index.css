@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { @apply transition-colors duration-200; }
+  body { @apply font-sans text-gray-800 bg-white dark:bg-gray-950 dark:text-gray-100 antialiased; }
+  h1, h2, h3, h4, h5, h6 { @apply font-heading; }
+}
+
+@layer components {
+  .glass { @apply bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border border-white/20 dark:border-gray-700/30; }
+  .glass-card { @apply glass rounded-2xl shadow-lg shadow-green-900/5; }
+  .btn-primary { @apply px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-500 text-white font-semibold rounded-xl hover:from-primary-700 hover:to-primary-600 transform hover:scale-105 active:scale-95 shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 transition-all duration-300; }
+  .btn-secondary { @apply px-6 py-3 bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 font-semibold rounded-xl border-2 border-primary-500 hover:bg-primary-50 dark:hover:bg-gray-700 transform hover:scale-105 active:scale-95 transition-all duration-300; }
+  .btn-outline { @apply px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-semibold rounded-xl hover:border-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transform hover:scale-105 active:scale-95 transition-all duration-300; }
+  .input-field { @apply w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition-all duration-300 text-gray-800 dark:text-gray-100; }
+  .card { @apply bg-white dark:bg-gray-900 rounded-2xl shadow-lg shadow-gray-200/50 dark:shadow-black/20 border border-gray-100 dark:border-gray-800 p-6 hover:shadow-xl transition-all duration-300; }
+  .gradient-text { @apply bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent; }
+  .section-title { @apply text-3xl md:text-4xl font-bold text-gray-900 dark:text-white; }
+  .section-subtitle { @apply text-lg text-gray-600 dark:text-gray-400 mt-2; }
+  .sidebar-link { @apply flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-200; }
+  .sidebar-link.active { @apply bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 font-semibold; }
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { @apply bg-transparent; }
+::-webkit-scrollbar-thumb { @apply bg-gray-300 dark:bg-gray-700 rounded-full; }
+::-webkit-scrollbar-thumb:hover { @apply bg-gray-400 dark:bg-gray-600; }
