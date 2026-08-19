@@ -44,8 +44,11 @@ app.get('/api/health', (req, res) => {
 
 app.get('/api/smtp-status', (req, res) => {
   res.json({
-    emailService: process.env.RESEND_API_KEY ? 'Resend API' : 'not configured',
-    resendApiKey: process.env.RESEND_API_KEY ? '****configured****' : 'not set',
+    emailService: 'Brevo SMTP',
+    smtpHost: 'smtp-relay.brevo.com',
+    smtpPort: 587,
+    smtpEmail: process.env.SMTP_EMAIL || 'not set',
+    smtpPassword: process.env.SMTP_PASSWORD ? '****configured****' : 'not set',
     fromEmail: process.env.FROM_EMAIL || 'not set',
     fromName: process.env.FROM_NAME || 'not set',
   });

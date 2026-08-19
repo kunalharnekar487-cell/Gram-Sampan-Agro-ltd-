@@ -1,31 +1,29 @@
-const { Resend } = require('resend');
+const nodemailer = require('nodemailer');
 
-let resend = null;
-if (process.env.RESEND_API_KEY) {
-  resend = new Resend(process.env.RESEND_API_KEY);
-}
-
-const FROM_EMAIL = process.env.FROM_EMAIL || process.env.SMTP_EMAIL || 'onboarding@resend.dev';
-const FROM_NAME = process.env.FROM_NAME || 'Gram Sampan Agro Ltd';
+const transporter = nodemailer.createTransport({
+  host: 'smtp-relay.brevo.com',
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_EMAIL,
+    pass: process.env.SMTP_PASSWORD,
+  },
+  connectionTimeout: 15000,
+  greetingTimeout: 15000,
+  socketTimeout: 15000,
+});
 
 const sendEmail = async (options) => {
-  if (!resend) {
-    console.error('RESEND_API_KEY not set — email not sent');
-    throw new Error('Email service not configured');
-  }
   try {
-    const result = await resend.emails.send({
-      from: `${FROM_NAME} <${FROM_EMAIL}>`,
+    const mailOptions = {
+      from: `"${process.env.FROM_NAME || 'Gram Sampan Agro Ltd'}" <${process.env.FROM_EMAIL || process.env.SMTP_EMAIL}>`,
       to: options.email,
       subject: options.subject,
       html: options.html,
-    });
-    if (result.error) {
-      console.error('Resend error:', result.error);
-      throw new Error(result.error.message || 'Email send failed');
-    }
-    console.log(`Email sent: ${result.data?.id}`);
-    return result.data;
+    };
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`Email sent: ${info.messageId}`);
+    return info;
   } catch (error) {
     console.error('Email send error:', error.message);
     throw error;
