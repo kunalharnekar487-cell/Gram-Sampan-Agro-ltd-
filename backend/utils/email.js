@@ -1,29 +1,41 @@
-const nodemailer = require('nodemailer');
-
-const transporter = nodemailer.createTransport({
-  host: 'smtp-relay.brevo.com',
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.SMTP_EMAIL,
-    pass: process.env.SMTP_PASSWORD,
-  },
-  connectionTimeout: 15000,
-  greetingTimeout: 15000,
-  socketTimeout: 15000,
-});
+const BREVO_API_KEY = process.env.SMTP_PASSWORD;
+const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
 
 const sendEmail = async (options) => {
+  if (!BREVO_API_KEY) {
+    throw new Error('Brevo API key not configured');
+  }
+
+  const payload = {
+    sender: {
+      name: process.env.FROM_NAME || 'Gram Sampan Agro Ltd',
+      email: process.env.FROM_EMAIL || 'kunalharnekar487@gmail.com',
+    },
+    to: [{ email: options.email }],
+    subject: options.subject,
+    htmlContent: options.html,
+  };
+
   try {
-    const mailOptions = {
-      from: `"${process.env.FROM_NAME || 'Gram Sampan Agro Ltd'}" <${process.env.FROM_EMAIL || process.env.SMTP_EMAIL}>`,
-      to: options.email,
-      subject: options.subject,
-      html: options.html,
-    };
-    const info = await transporter.sendMail(mailOptions);
-    console.log(`Email sent: ${info.messageId}`);
-    return info;
+    const response = await fetch(BREVO_API_URL, {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'content-type': 'application/json',
+        'api-key': BREVO_API_KEY,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('Brevo API error:', response.status, data);
+      throw new Error(data.message || `Brevo API error: ${response.status}`);
+    }
+
+    console.log('Email sent:', data.messageId);
+    return data;
   } catch (error) {
     console.error('Email send error:', error.message);
     throw error;
