@@ -27,7 +27,9 @@ const createTokenResponse = (user, statusCode, res) => {
 exports.register = async (req, res) => {
   try {
     const { name, email, mobile, password, role, village, taluka, district } = req.body;
-    const exists = await User.findOne({ $or: [{ email }, { mobile }] });
+    const normalizedEmail = email ? email.toLowerCase().trim() : '';
+    const normalizedMobile = mobile ? mobile.trim() : '';
+    const exists = await User.findOne({ $or: [{ email: normalizedEmail }, { mobile: normalizedMobile }] });
     if (exists) return res.status(400).json({ success: false, message: 'User already exists with this email or mobile' });
 
     const user = await User.create({ name, email, mobile, password, role, village, taluka, district, isVerified: true });
@@ -51,34 +53,46 @@ exports.sendRegistrationOTP = async (req, res) => {
     const { name, email, mobile, role, village, taluka, district } = req.body;
     if (!email && !mobile) return res.status(400).json({ success: false, message: 'Email or mobile is required' });
 
-    const exists = await User.findOne({ $or: [{ email }, { mobile }] });
+    const query = { $or: [] };
+    if (email) query.$or.push({ email: email.toLowerCase().trim() });
+    if (mobile) query.$or.push({ mobile: mobile.trim() });
+    if (query.$or.length === 0) return res.status(400).json({ success: false, message: 'Email or mobile is required' });
+
+    const exists = await User.findOne(query);
     if (exists) return res.status(400).json({ success: false, message: 'User already exists with this email or mobile' });
 
     const otp = generateOTP();
-    const key = email || mobile;
+    const key = (email || mobile).toLowerCase().trim();
 
     regOTPStore.set(key, {
-      data: { name, email, mobile, role, village, taluka, district },
+      data: { name, email: email ? email.toLowerCase().trim() : '', mobile: mobile ? mobile.trim() : '', role, village, taluka, district },
       otp,
       expiresAt: Date.now() + 10 * 60 * 1000,
     });
 
     let emailSent = false;
     let emailError = null;
-    if (email && process.env.SMTP_EMAIL) {
+    if (email) {
       try {
-        await sendOTPEmail(email, otp, name);
+        await sendOTPEmail(email.toLowerCase().trim(), otp, name);
         emailSent = true;
-        console.log(`OTP email sent to ${email}: ${otp}`);
+        console.log(`OTP email sent to ${email}`);
       } catch (err) {
         emailError = err.message;
         console.error('Email send failed:', err.message);
       }
     }
 
+    if (!emailSent && email) {
+      return res.status(500).json({
+        success: false,
+        message: `Failed to send OTP email: ${emailError || 'Unknown error'}. Please try again.`,
+      });
+    }
+
     res.json({
       success: true,
-      message: emailSent ? 'OTP sent successfully' : (emailError ? `OTP created but email failed: ${emailError}` : 'OTP created (email not configured)'),
+      message: 'OTP sent successfully',
       sentTo: email || mobile,
       emailSent,
       otp: process.env.NODE_ENV === 'development' ? otp : undefined,
@@ -91,7 +105,7 @@ exports.sendRegistrationOTP = async (req, res) => {
 exports.verifyRegistrationOTP = async (req, res) => {
   try {
     const { email, mobile, otp, password } = req.body;
-    const key = email || mobile;
+    const key = (email || mobile).toLowerCase().trim();
 
     const stored = regOTPStore.get(key);
     if (!stored) return res.status(400).json({ success: false, message: 'No OTP found. Please request a new one.' });
@@ -211,7 +225,7 @@ exports.forgotPassword = async (req, res) => {
     const { mobile, email } = req.body;
     if (!mobile && !email) return res.status(400).json({ success: false, message: 'Mobile or email is required' });
 
-    const query = mobile ? { mobile } : { email };
+    const query = mobile ? { mobile: mobile.trim() } : { email: email.toLowerCase().trim() };
     const user = await User.findOne(query);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 

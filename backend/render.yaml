@@ -30,4 +30,6 @@ services:
         sync: false
       - key: FROM_NAME
         value: Gram Sampan Agro Ltd
+      - key: RESEND_API_KEY
+        sync: false
     healthCheckPath: /api/health

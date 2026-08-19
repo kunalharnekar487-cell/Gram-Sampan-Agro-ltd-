@@ -1,29 +1,31 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT) || 465,
-  secure: true,
-  auth: {
-    user: process.env.SMTP_EMAIL,
-    pass: process.env.SMTP_PASSWORD,
-  },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
-});
+let resend = null;
+if (process.env.RESEND_API_KEY) {
+  resend = new Resend(process.env.RESEND_API_KEY);
+}
+
+const FROM_EMAIL = process.env.FROM_EMAIL || process.env.SMTP_EMAIL || 'onboarding@resend.dev';
+const FROM_NAME = process.env.FROM_NAME || 'Gram Sampan Agro Ltd';
 
 const sendEmail = async (options) => {
+  if (!resend) {
+    console.error('RESEND_API_KEY not set — email not sent');
+    throw new Error('Email service not configured');
+  }
   try {
-    const mailOptions = {
-      from: `"${process.env.FROM_NAME || 'Gram Sampan Agro Ltd'}" <${process.env.FROM_EMAIL || process.env.SMTP_EMAIL}>`,
+    const result = await resend.emails.send({
+      from: `${FROM_NAME} <${FROM_EMAIL}>`,
       to: options.email,
       subject: options.subject,
       html: options.html,
-    };
-    const info = await transporter.sendMail(mailOptions);
-    console.log(`Email sent: ${info.messageId}`);
-    return info;
+    });
+    if (result.error) {
+      console.error('Resend error:', result.error);
+      throw new Error(result.error.message || 'Email send failed');
+    }
+    console.log(`Email sent: ${result.data?.id}`);
+    return result.data;
   } catch (error) {
     console.error('Email send error:', error.message);
     throw error;
@@ -102,7 +104,6 @@ const sendWelcomeEmail = async (email, name) => {
           <p style="color: #a5d6a7; margin: 5px 0 0;">Partner: Raigad Agro Solution</p>
         </div>
         <div style="background: #fff; padding: 40px 30px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-          <div style="text-align: center; margin-bottom: 20px;"><span style="font-size: 48px;">🎉</span></div>
           <h2 style="color: #1B5E20; text-align: center; margin: 0 0 10px;">Welcome, ${name}!</h2>
           <p style="color: #666; line-height: 1.6; text-align: center;">Your account has been successfully created. You can now access the Gram Sampan platform.</p>
           <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />

@@ -44,10 +44,8 @@ app.get('/api/health', (req, res) => {
 
 app.get('/api/smtp-status', (req, res) => {
   res.json({
-    smtpHost: process.env.SMTP_HOST || 'not set',
-    smtpPort: process.env.SMTP_PORT || 'not set',
-    smtpEmail: process.env.SMTP_EMAIL || 'not set',
-    smtpPassword: process.env.SMTP_PASSWORD ? '****configured****' : 'not set',
+    emailService: process.env.RESEND_API_KEY ? 'Resend API' : 'not configured',
+    resendApiKey: process.env.RESEND_API_KEY ? '****configured****' : 'not set',
     fromEmail: process.env.FROM_EMAIL || 'not set',
     fromName: process.env.FROM_NAME || 'not set',
   });
