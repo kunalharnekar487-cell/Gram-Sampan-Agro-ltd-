@@ -41,7 +41,7 @@ exports.chat = async (req, res) => {
     console.log('GEMINI_API_KEY is set, length:', process.env.GEMINI_API_KEY.length);
 
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3.6-flash',
       systemInstruction: SYSTEM_PROMPT,
     });
 
