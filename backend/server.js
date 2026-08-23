@@ -15,6 +15,7 @@ const mahilaGroupRoutes = require('./routes/mahilaGroups');
 const productRoutes = require('./routes/products');
 const reportRoutes = require('./routes/reports');
 const adminRoutes = require('./routes/admin');
+const chatbotRoutes = require('./routes/chatbot');
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.use('/api/mahila-groups', mahilaGroupRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/chatbot', chatbotRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'Gram Sampan Agro Ltd API is running', timestamp: new Date().toISOString() });
