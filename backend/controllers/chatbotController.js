@@ -16,7 +16,7 @@ exports.chat = async (req, res) => {
     }
 
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.6-flash',
       systemInstruction: SYSTEM_PROMPT,
     });
 
@@ -41,6 +41,6 @@ exports.chat = async (req, res) => {
     res.json({ success: true, data: { reply: text } });
   } catch (error) {
     console.error('Chatbot error:', error.message);
-    res.status(500).json({ success: false, message: `Error: ${error.message}` });
+    res.status(500).json({ success: false, message: 'Sorry, something went wrong. Please try again.' });
   }
 };
