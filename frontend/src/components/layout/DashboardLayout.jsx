@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { FiBell, FiMenu } from 'react-icons/fi';
 import Sidebar from './Sidebar';
 import ThemeToggle from '../ui/ThemeToggle';
+import Chatbot from '../Chatbot';
 import { useAuth } from '../../context/AuthContext';
 
 export default function DashboardLayout() {
@@ -33,6 +34,7 @@ export default function DashboardLayout() {
           <Outlet />
         </main>
       </div>
+      <Chatbot />
     </div>
   );
 }
