@@ -160,19 +160,16 @@ export default function Chatbot() {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-4 sm:right-6 z-50 flex items-center gap-2 bg-gradient-to-r from-primary-600 to-green-600 text-white rounded-full shadow-lg shadow-primary-500/40 hover:shadow-xl hover:shadow-primary-500/50 transition-all"
+        className="fixed bottom-6 right-4 sm:right-6 z-50 flex items-center gap-2 bg-black dark:bg-white text-white dark:text-black rounded-full shadow-lg hover:shadow-xl transition-all"
       >
         <div className="w-14 h-14 flex items-center justify-center">
           {isOpen ? <FiX size={24} /> : (
-            <div className="relative">
-              <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="18" cy="18" r="18" fill="white" fillOpacity="0.2" />
-                <path d="M18 8C12.48 8 8 12.48 8 18C8 20.21 8.73 22.25 10 23.79V28L14.09 25.73C15.34 26.05 16.64 26.22 18 26.22C23.52 26.22 28 21.74 28 16.22C28 10.7 23.52 8 18 8Z" fill="white" />
-                <circle cx="13" cy="16" r="1.5" fill="#16a34a" />
-                <circle cx="18" cy="16" r="1.5" fill="#16a34a" />
-                <circle cx="23" cy="16" r="1.5" fill="#16a34a" />
-              </svg>
-            </div>
+            <svg width="32" height="32" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 4C9.16 4 2 10.48 2 18.5C2 22.92 4.24 26.84 7.72 29.48L6.5 33L10.6 31.08C12.68 32.04 15.04 32.58 17.56 32.58C26.38 32.58 33.5 26.1 33.5 18.12C33.5 10.14 26.38 4 18 4Z" fill="currentColor" />
+              <circle cx="12" cy="17.5" r="2" fill="white" />
+              <circle cx="18" cy="17.5" r="2" fill="white" />
+              <circle cx="24" cy="17.5" r="2" fill="white" />
+            </svg>
           )}
         </div>
         {!isOpen && (
