@@ -1,0 +1,8 @@
+{
+  "name": "gram-sampan-agro",
+  "private": true,
+  "scripts": {
+    "install": "cd frontend && npm install",
+    "build": "cd frontend && npm run build"
+  }
+}
