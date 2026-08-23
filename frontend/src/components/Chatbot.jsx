@@ -41,7 +41,7 @@ export default function Chatbot() {
       const history = [...messages, userMsg].slice(-10).map(m => ({
         role: m.role === 'bot' ? 'model' : 'user',
         text: m.text,
-      }));
+      })).filter((_, i, arr) => i === 0 ? arr[i].role === 'user' : true);
 
       const { data } = await API.post('/chatbot/chat', { message: msg, history });
       setMessages(prev => [...prev, { role: 'bot', text: data.data.reply }]);

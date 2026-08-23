@@ -46,10 +46,12 @@ exports.chat = async (req, res) => {
     });
 
     const chat = model.startChat({
-      history: history.map(msg => ({
-        role: msg.role === 'user' ? 'user' : 'model',
-        parts: [{ text: msg.text }],
-      })),
+      history: history.filter(msg => msg.role === 'user' || msg.role === 'model').reduce((acc, msg) => {
+        const role = msg.role === 'bot' ? 'model' : msg.role;
+        if (acc.length === 0 && role !== 'user') return acc;
+        acc.push({ role, parts: [{ text: msg.text }] });
+        return acc;
+      }, []),
       generationConfig: {
         maxOutputTokens: 1024,
         temperature: 0.7,
