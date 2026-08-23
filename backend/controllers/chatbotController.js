@@ -53,7 +53,7 @@ exports.chat = async (req, res) => {
         return acc;
       }, []),
       generationConfig: {
-        maxOutputTokens: 1024,
+        maxOutputTokens: 4096,
         temperature: 0.7,
         topP: 0.9,
       },
