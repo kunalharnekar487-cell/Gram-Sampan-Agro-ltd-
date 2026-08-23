@@ -41,6 +41,6 @@ exports.chat = async (req, res) => {
     res.json({ success: true, data: { reply: text } });
   } catch (error) {
     console.error('Chatbot error:', error.message);
-    res.status(500).json({ success: false, message: 'Sorry, something went wrong. Please try again.' });
+    res.status(500).json({ success: false, message: `Error: ${error.message}` });
   }
 };
