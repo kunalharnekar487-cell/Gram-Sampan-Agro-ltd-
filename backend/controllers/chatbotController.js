@@ -35,11 +35,13 @@ exports.chat = async (req, res) => {
     }
 
     if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ success: false, message: 'AI service not configured. Please contact support.' });
+      console.error('GEMINI_API_KEY is not set in environment variables');
+      return res.status(500).json({ success: false, message: 'AI service not configured. GEMINI_API_KEY is missing.' });
     }
+    console.log('GEMINI_API_KEY is set, length:', process.env.GEMINI_API_KEY.length);
 
     const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.0-flash',
       systemInstruction: SYSTEM_PROMPT,
     });
 
@@ -61,7 +63,7 @@ exports.chat = async (req, res) => {
 
     res.json({ success: true, data: { reply: text } });
   } catch (error) {
-    console.error('Chatbot error:', error.message);
-    res.status(500).json({ success: false, message: 'Sorry, I encountered an error. Please try again.' });
+    console.error('Chatbot error:', error.message, error.stack);
+    res.status(500).json({ success: false, message: `Sorry, I encountered an error: ${error.message}` });
   }
 };
