@@ -30,7 +30,6 @@ import AdminDashboard from './pages/dashboard/AdminDashboard';
 import AdminFarmers from './pages/dashboard/AdminFarmers';
 import AdminMahilaGroups from './pages/dashboard/AdminMahilaGroups';
 import AdminReports from './pages/dashboard/AdminReports';
-import Chatbot from './components/Chatbot';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user, loading } = useAuth();
@@ -110,7 +109,6 @@ export default function App() {
       <AuthProvider>
         <Toaster position="top-right" toastOptions={{ duration: 3000, style: { borderRadius: '12px', padding: '12px 16px', fontSize: '14px' } }} />
         <AppRoutes />
-        <Chatbot />
       </AuthProvider>
     </Router>
   );

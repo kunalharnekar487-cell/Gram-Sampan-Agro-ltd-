@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiArrowRight, FiCheckCircle, FiUsers, FiHome, FiBarChart2, FiHeart, FiTrendingUp, FiStar, FiChevronDown, FiUserPlus, FiShield, FiPackage, FiMap, FiFileText, FiLayers } from 'react-icons/fi';
 import CountUp from '../../components/charts/CountUp';
+import Chatbot from '../../components/Chatbot';
 
 const fadeUp = { initial: { opacity: 0, y: 30 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true } };
 
@@ -42,6 +43,7 @@ const testimonials = [
 export default function Home() {
   return (
     <div>
+      <Chatbot />
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center bg-gradient-to-br from-primary-900 via-primary-800 to-green-900 overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')] bg-cover bg-center opacity-20" />

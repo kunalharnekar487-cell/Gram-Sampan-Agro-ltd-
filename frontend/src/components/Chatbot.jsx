@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiX, FiSend, FiUser, FiCpu } from 'react-icons/fi';
+import { FiX, FiSend, FiUser, FiMessageCircle } from 'react-icons/fi';
 import API from '../api/axios';
 
 const SUGGESTIONS = [
@@ -73,7 +73,7 @@ export default function Chatbot() {
             <div className="bg-gradient-to-r from-primary-600 to-primary-700 px-4 py-3 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center">
-                  <FiCpu className="text-white" size={18} />
+                  <FiMessageCircle className="text-white" size={18} />
                 </div>
                 <div>
                   <h3 className="text-white font-semibold text-sm">Krushi Sahayak</h3>
@@ -93,7 +93,7 @@ export default function Chatbot() {
                     : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-2xl rounded-bl-md'
                   } px-4 py-2.5`}>
                     <div className="flex items-start gap-2">
-                      {msg.role === 'bot' && <FiCpu size={14} className="text-primary-500 mt-0.5 shrink-0" />}
+                      {msg.role === 'bot' && <FiMessageCircle size={14} className="text-primary-500 mt-0.5 shrink-0" />}
                       <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.text}</p>
                       {msg.role === 'user' && <FiUser size={14} className="text-primary-200 mt-0.5 shrink-0" />}
                     </div>
@@ -155,13 +155,35 @@ export default function Chatbot() {
         )}
       </AnimatePresence>
 
+      {/* Chat Logo Button - fixed bottom-right */}
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-4 sm:right-6 w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-700 text-white rounded-full shadow-lg shadow-primary-500/30 flex items-center justify-center z-50 hover:shadow-xl transition-shadow"
+        className="fixed bottom-6 right-4 sm:right-6 z-50 flex items-center gap-2 bg-gradient-to-r from-primary-600 to-green-600 text-white rounded-full shadow-lg shadow-primary-500/40 hover:shadow-xl hover:shadow-primary-500/50 transition-all"
       >
-        {isOpen ? <FiX size={24} /> : <FiCpu size={24} />}
+        <div className="w-14 h-14 flex items-center justify-center">
+          {isOpen ? <FiX size={24} /> : (
+            <div className="relative">
+              <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="18" cy="18" r="18" fill="white" fillOpacity="0.2" />
+                <path d="M18 8C12.48 8 8 12.48 8 18C8 20.21 8.73 22.25 10 23.79V28L14.09 25.73C15.34 26.05 16.64 26.22 18 26.22C23.52 26.22 28 21.74 28 16.22C28 10.7 23.52 8 18 8Z" fill="white" />
+                <circle cx="13" cy="16" r="1.5" fill="#16a34a" />
+                <circle cx="18" cy="16" r="1.5" fill="#16a34a" />
+                <circle cx="23" cy="16" r="1.5" fill="#16a34a" />
+              </svg>
+            </div>
+          )}
+        </div>
+        {!isOpen && (
+          <motion.span
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="pr-4 text-sm font-semibold hidden sm:block"
+          >
+            Krushi Sahayak
+          </motion.span>
+        )}
       </motion.button>
     </>
   );
