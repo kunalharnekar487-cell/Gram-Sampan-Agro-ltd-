@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { FiSave, FiSend, FiPlus, FiX, FiUser } from 'react-icons/fi';
+import { FiSave, FiSend, FiPlus, FiX, FiUser, FiCamera } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import API from '../../api/axios';
 import LoadingSkeleton from '../../components/ui/LoadingSkeleton';
+
+const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://gram-sampan-backend.onrender.com';
 
 export default function MahilaProfile() {
   const [form, setForm] = useState({
@@ -11,10 +13,13 @@ export default function MahilaProfile() {
     contactNumber: '', members: [], productsManufactured: [], machinesAvailable: [],
     annualIncome: '', villagePopulation: '', landArea: '', sellingMethod: '', problems: '', supportNeeded: '',
   });
+  const [productImages, setProductImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [newMember, setNewMember] = useState({ name: '', age: '', role: '', mobile: '' });
   const [newMachine, setNewMachine] = useState({ name: '', quantity: '' });
+  const imageInputRef = useRef(null);
 
   useEffect(() => { fetchProfile(); }, []);
 
@@ -22,8 +27,9 @@ export default function MahilaProfile() {
     try {
       const { data } = await API.get('/mahila-groups/profile');
       if (data.data) {
-        const { productImages, status, approvedBy, approvedAt, isProfileComplete, createdAt, updatedAt, __v, _id, userId, ...fields } = data.data;
+        const { productImages: pi, status, approvedBy, approvedAt, isProfileComplete, createdAt, updatedAt, __v, _id, userId, ...fields } = data.data;
         setForm(prev => ({ ...prev, ...fields }));
+        setProductImages(pi || []);
       }
     } catch (err) { toast.error('Failed to load'); }
     finally { setLoading(false); }
@@ -38,6 +44,27 @@ export default function MahilaProfile() {
       toast.success(mode === 'draft' ? 'Draft saved!' : 'Submitted for approval!');
     } catch (err) { toast.error(err.response?.data?.message || 'Failed'); }
     finally { setSaving(false); }
+  };
+
+  const handleUpload = async (files) => {
+    if (!files.length) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      Array.from(files).forEach(f => fd.append('images', f));
+      const { data } = await API.post('/mahila-groups/upload-images', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      setProductImages(data.data.productImages);
+      toast.success('Images uploaded!');
+    } catch (err) { toast.error(err.response?.data?.message || 'Upload failed'); }
+    finally { setUploading(false); }
+  };
+
+  const handleDeleteImage = async (url) => {
+    try {
+      const { data } = await API.delete('/mahila-groups/delete-image', { data: { url } });
+      setProductImages(data.data.productImages);
+      toast.success('Image removed');
+    } catch (err) { toast.error('Failed to remove image'); }
   };
 
   const addMember = () => {
@@ -119,6 +146,24 @@ export default function MahilaProfile() {
             <div className="space-y-2 mb-3">{form.machinesAvailable.map((m, i) => (<div key={i} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg"><span className="text-sm">{m.name} (x{m.quantity})</span><button onClick={() => removeMachine(i)} className="text-red-500"><FiX size={14} /></button></div>))}</div>
             <div className="flex gap-2"><input type="text" value={newMachine.name} onChange={e => setNewMachine({...newMachine, name: e.target.value})} placeholder="Machine name" className="input-field text-sm flex-1" /><input type="text" value={newMachine.quantity} onChange={e => setNewMachine({...newMachine, quantity: e.target.value})} placeholder="Qty" className="input-field text-sm w-20" /><button onClick={addMachine} className="btn-primary text-sm"><FiPlus /></button></div>
           </div>
+        </div>
+      </motion.div>
+
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="card">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Product Images</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Upload photos of your group's products</p>
+        <input ref={imageInputRef} type="file" accept="image/*" multiple className="hidden" onChange={e => handleUpload(e.target.files)} />
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+          {productImages.map((photo, i) => (
+            <div key={i} className="relative group aspect-square rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+              <img src={photo.startsWith('http') ? photo : `${API_BASE}/${photo}`} alt="" className="w-full h-full object-cover" />
+              <button onClick={() => handleDeleteImage(photo)} className="absolute top-1.5 right-1.5 p-1 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"><FiX size={14} /></button>
+            </div>
+          ))}
+          <button onClick={() => imageInputRef.current?.click()} disabled={uploading} className="aspect-square rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-primary-500 dark:hover:border-primary-500 flex flex-col items-center justify-center gap-2 text-gray-400 hover:text-primary-500 transition-colors">
+            <FiCamera size={24} />
+            <span className="text-xs">{uploading ? 'Uploading...' : 'Add Image'}</span>
+          </button>
         </div>
       </motion.div>
 

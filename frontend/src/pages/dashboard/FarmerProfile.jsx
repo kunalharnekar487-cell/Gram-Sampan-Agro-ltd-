@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { FiSave, FiSend, FiCamera, FiPlus, FiX } from 'react-icons/fi';
 import toast from 'react-hot-toast';
@@ -9,14 +9,21 @@ const summerOptions = ['Rice', 'Wheat', 'Jowar', 'Bajra', 'Maize', 'Groundnut', 
 const monsoonOptions = ['Rice', 'Wheat', 'Jowar', 'Bajra', 'Maize', 'Groundnut', 'Soybean', 'Cotton', 'Sugarcane', 'Tur', 'Moong', 'Udid'];
 const farmingTypes = ['Organic', 'Chemical', 'Mixed'];
 
+const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://gram-sampan-backend.onrender.com';
+
 export default function FarmerProfile() {
   const [form, setForm] = useState({
     fullName: '', address: '', village: '', taluka: '', district: '', pincode: '', mobile: '',
     landArea: '', farmingType: '', summerCrops: [], monsoonCrops: [], sellingMethod: '',
     annualIncome: '', distanceFromHighway: '', villagePopulation: '', farmingProblems: '', supportRequired: '',
   });
+  const [farmPhotos, setFarmPhotos] = useState([]);
+  const [productPhotos, setProductPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const farmInputRef = useRef(null);
+  const productInputRef = useRef(null);
 
   useEffect(() => { fetchProfile(); }, []);
 
@@ -24,8 +31,10 @@ export default function FarmerProfile() {
     try {
       const { data } = await API.get('/farmers/profile');
       if (data.data) {
-        const { farmPhotos, productPhotos, status, approvedBy, approvedAt, isProfileComplete, createdAt, updatedAt, __v, _id, userId, ...fields } = data.data;
+        const { farmPhotos: fp, productPhotos: pp, status, approvedBy, approvedAt, isProfileComplete, createdAt, updatedAt, __v, _id, userId, ...fields } = data.data;
         setForm(prev => ({ ...prev, ...fields }));
+        setFarmPhotos(fp || []);
+        setProductPhotos(pp || []);
       }
     } catch (err) { toast.error('Failed to load profile'); }
     finally { setLoading(false); }
@@ -36,10 +45,34 @@ export default function FarmerProfile() {
     setSaving(true);
     try {
       const endpoint = mode === 'draft' ? '/farmers/draft' : '/farmers/submit';
-      const { data } = await API.post(endpoint, form);
+      await API.post(endpoint, form);
       toast.success(mode === 'draft' ? 'Draft saved!' : 'Profile submitted for approval!');
     } catch (err) { toast.error(err.response?.data?.message || 'Failed to save'); }
     finally { setSaving(false); }
+  };
+
+  const handleUpload = async (files, type) => {
+    if (!files.length) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('type', type);
+      Array.from(files).forEach(f => fd.append('photos', f));
+      const { data } = await API.post('/farmers/upload-photos', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      if (type === 'farm') setFarmPhotos(data.data.farmPhotos);
+      else setProductPhotos(data.data.productPhotos);
+      toast.success('Photos uploaded!');
+    } catch (err) { toast.error(err.response?.data?.message || 'Upload failed'); }
+    finally { setUploading(false); }
+  };
+
+  const handleDeletePhoto = async (url, type) => {
+    try {
+      const { data } = await API.delete('/farmers/delete-photo', { data: { type, url } });
+      if (type === 'farm') setFarmPhotos(data.data.farmPhotos);
+      else setProductPhotos(data.data.productPhotos);
+      toast.success('Photo removed');
+    } catch (err) { toast.error('Failed to remove photo'); }
   };
 
   const toggleCrop = (field, crop) => {
@@ -101,6 +134,42 @@ export default function FarmerProfile() {
           <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Village Population</label><input type="text" value={form.villagePopulation} onChange={e => setForm({...form, villagePopulation: e.target.value})} className="input-field" /></div>
           <div className="md:col-span-2"><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Problems in Farming</label><textarea rows={3} value={form.farmingProblems} onChange={e => setForm({...form, farmingProblems: e.target.value})} className="input-field resize-none" placeholder="Describe any problems you face in farming..." /></div>
           <div className="md:col-span-2"><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Support Required</label><textarea rows={3} value={form.supportRequired} onChange={e => setForm({...form, supportRequired: e.target.value})} className="input-field resize-none" placeholder="What kind of support do you need?" /></div>
+        </div>
+      </motion.div>
+
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="card">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Farm Photos</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Upload photos of your farm, land, and crops</p>
+        <input ref={farmInputRef} type="file" accept="image/*" multiple className="hidden" onChange={e => handleUpload(e.target.files, 'farm')} />
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+          {farmPhotos.map((photo, i) => (
+            <div key={i} className="relative group aspect-square rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+              <img src={photo.startsWith('http') ? photo : `${API_BASE}/${photo}`} alt="" className="w-full h-full object-cover" />
+              <button onClick={() => handleDeletePhoto(photo, 'farm')} className="absolute top-1.5 right-1.5 p-1 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"><FiX size={14} /></button>
+            </div>
+          ))}
+          <button onClick={() => farmInputRef.current?.click()} disabled={uploading} className="aspect-square rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-primary-500 dark:hover:border-primary-500 flex flex-col items-center justify-center gap-2 text-gray-400 hover:text-primary-500 transition-colors">
+            <FiCamera size={24} />
+            <span className="text-xs">{uploading ? 'Uploading...' : 'Add Photo'}</span>
+          </button>
+        </div>
+      </motion.div>
+
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="card">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Product Photos</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Upload photos of your farm products</p>
+        <input ref={productInputRef} type="file" accept="image/*" multiple className="hidden" onChange={e => handleUpload(e.target.files, 'product')} />
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+          {productPhotos.map((photo, i) => (
+            <div key={i} className="relative group aspect-square rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+              <img src={photo.startsWith('http') ? photo : `${API_BASE}/${photo}`} alt="" className="w-full h-full object-cover" />
+              <button onClick={() => handleDeletePhoto(photo, 'product')} className="absolute top-1.5 right-1.5 p-1 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"><FiX size={14} /></button>
+            </div>
+          ))}
+          <button onClick={() => productInputRef.current?.click()} disabled={uploading} className="aspect-square rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-primary-500 dark:hover:border-primary-500 flex flex-col items-center justify-center gap-2 text-gray-400 hover:text-primary-500 transition-colors">
+            <FiCamera size={24} />
+            <span className="text-xs">{uploading ? 'Uploading...' : 'Add Photo'}</span>
+          </button>
         </div>
       </motion.div>
     </div>

@@ -74,6 +74,23 @@ exports.uploadPhotos = async (req, res) => {
   }
 };
 
+exports.deletePhoto = async (req, res) => {
+  try {
+    const farmer = await Farmer.findOne({ userId: req.user.id });
+    if (!farmer) return res.status(404).json({ success: false, message: 'Farmer not found' });
+    const { type, url } = req.body;
+    if (type === 'farm') {
+      farmer.farmPhotos = farmer.farmPhotos.filter(p => p !== url);
+    } else {
+      farmer.productPhotos = farmer.productPhotos.filter(p => p !== url);
+    }
+    await farmer.save();
+    res.json({ success: true, data: farmer });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 exports.getFarmers = async (req, res) => {
   try {
     const { page = 1, limit = 10, village, taluka, district, status, search } = req.query;
