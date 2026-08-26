@@ -19,6 +19,7 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
     if ((method === 'mobile' && !mobile) || (method === 'email' && !email) || !password) return toast.error('Please fill all fields');
     setLoading(true);
     try {

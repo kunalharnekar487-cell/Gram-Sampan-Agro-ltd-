@@ -27,6 +27,7 @@ export default function ForgotPassword() {
 
   const sendOTP = async () => {
     if (!identifier) return toast.error(`Enter your ${method === 'mobile' ? 'mobile number' : 'email'}`);
+    if (loading) return;
     setLoading(true);
     try {
       const payload = method === 'mobile' ? { mobile } : { email };
@@ -44,6 +45,7 @@ export default function ForgotPassword() {
     if (password.length < 6) return toast.error('Password must be at least 6 characters');
     const code = otp.join('');
     if (code.length !== 6) return toast.error('Enter complete OTP');
+    if (loading) return;
     setLoading(true);
     try {
       const payload = { otp: code, password };

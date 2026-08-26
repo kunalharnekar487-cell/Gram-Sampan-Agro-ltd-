@@ -17,6 +17,7 @@ export default function FarmerProducts() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ name: '', category: 'vegetables', description: '', quantity: '', unit: 'kg', price: '', availability: true });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => { fetchProducts(); }, [page]);
 
@@ -34,6 +35,8 @@ export default function FarmerProducts() {
   const openEdit = (product) => { setEditing(product); setForm({ name: product.name, category: product.category, description: product.description, quantity: product.quantity, unit: product.unit, price: product.price, availability: product.availability }); setModalOpen(true); };
 
   const handleSave = async () => {
+    if (saving) return;
+    setSaving(true);
     try {
       if (editing) {
         await API.put(`/products/${editing._id}`, form);
@@ -45,6 +48,7 @@ export default function FarmerProducts() {
       setModalOpen(false);
       fetchProducts();
     } catch (err) { toast.error(err.response?.data?.message || 'Failed'); }
+    finally { setSaving(false); }
   };
 
   const handleDelete = async (id) => {
@@ -90,7 +94,7 @@ export default function FarmerProducts() {
           <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" checked={form.availability} onChange={e => setForm({...form, availability: e.target.checked})} className="rounded border-gray-300 text-primary-600" /> Available for sale</label>
           <div className="flex justify-end gap-3 pt-4">
             <button onClick={() => setModalOpen(false)} className="btn-outline text-sm">Cancel</button>
-            <button onClick={handleSave} className="btn-primary text-sm">{editing ? 'Update' : 'Create'} Product</button>
+            <button onClick={handleSave} disabled={saving} className="btn-primary text-sm">{saving ? 'Saving...' : editing ? 'Update' : 'Create'} Product</button>
           </div>
         </div>
       </Modal>

@@ -33,6 +33,7 @@ export default function Register() {
 
   const handleSendOTP = async (e) => {
     e.preventDefault();
+    if (loading) return;
     if (form.password !== form.confirmPassword) return toast.error('Passwords do not match');
     if (form.password.length < 6) return toast.error('Password must be at least 6 characters');
     if (!form.email && !form.mobile) return toast.error('Enter email or mobile to receive OTP');
@@ -53,6 +54,7 @@ export default function Register() {
   const handleVerifyOTP = async () => {
     const code = otp.join('');
     if (code.length !== 6) return toast.error('Enter complete OTP');
+    if (loading) return;
 
     setLoading(true);
     try {

@@ -23,6 +23,7 @@ export default function LoginOTP() {
 
   const sendOTP = async () => {
     if (!mobile) return toast.error('Enter mobile number');
+    if (loading) return;
     setLoading(true);
     try {
       await API.post('/auth/send-otp', { mobile });
@@ -37,6 +38,7 @@ export default function LoginOTP() {
   const verifyOTP = async () => {
     const code = otp.join('');
     if (code.length !== 6) return toast.error('Enter complete OTP');
+    if (loading) return;
     setLoading(true);
     try {
       const { data } = await API.post('/auth/verify-otp', { mobile, otp: code });

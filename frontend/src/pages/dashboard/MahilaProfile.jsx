@@ -29,7 +29,8 @@ export default function MahilaProfile() {
     finally { setLoading(false); }
   };
 
-  const handleSubmit = async (mode = 'submit') => {
+  const handleSubmit = async (mode = 'draft') => {
+    if (saving) return;
     setSaving(true);
     try {
       const endpoint = mode === 'draft' ? '/mahila-groups/draft' : '/mahila-groups/submit';
