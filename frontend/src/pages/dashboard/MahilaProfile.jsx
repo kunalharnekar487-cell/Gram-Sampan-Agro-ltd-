@@ -14,12 +14,14 @@ export default function MahilaProfile() {
     annualIncome: '', villagePopulation: '', landArea: '', sellingMethod: '', problems: '', supportNeeded: '',
   });
   const [productImages, setProductImages] = useState([]);
+  const [profilePhoto, setProfilePhoto] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [newMember, setNewMember] = useState({ name: '', age: '', role: '', mobile: '' });
   const [newMachine, setNewMachine] = useState({ name: '', quantity: '' });
   const imageInputRef = useRef(null);
+  const profileInputRef = useRef(null);
 
   useEffect(() => { fetchProfile(); }, []);
 
@@ -27,9 +29,10 @@ export default function MahilaProfile() {
     try {
       const { data } = await API.get('/mahila-groups/profile');
       if (data.data) {
-        const { productImages: pi, status, approvedBy, approvedAt, isProfileComplete, createdAt, updatedAt, __v, _id, userId, ...fields } = data.data;
+        const { productImages: pi, profilePhoto: ppUrl, status, approvedBy, approvedAt, isProfileComplete, createdAt, updatedAt, __v, _id, userId, ...fields } = data.data;
         setForm(prev => ({ ...prev, ...fields }));
         setProductImages(pi || []);
+        setProfilePhoto(ppUrl || '');
       }
     } catch (err) { toast.error('Failed to load'); }
     finally { setLoading(false); }
@@ -67,6 +70,19 @@ export default function MahilaProfile() {
     } catch (err) { toast.error('Failed to remove image'); }
   };
 
+  const handleProfilePhotoUpload = async (file) => {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('images', file);
+      const { data } = await API.post('/mahila-groups/upload-profile-photo', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      setProfilePhoto(data.data.profilePhoto);
+      toast.success('Profile photo updated!');
+    } catch (err) { toast.error(err.response?.data?.message || 'Upload failed'); }
+    finally { setUploading(false); }
+  };
+
   const addMember = () => {
     if (!newMember.name) return toast.error('Enter member name');
     setForm({ ...form, members: [...form.members, newMember] });
@@ -101,6 +117,28 @@ export default function MahilaProfile() {
           <button onClick={() => handleSubmit('submit')} disabled={saving} className="btn-primary text-sm"><FiSend className="inline mr-1" />{saving ? 'Saving...' : 'Submit'}</button>
         </div>
       </div>
+
+      <input ref={profileInputRef} type="file" accept="image/*" className="hidden" onChange={e => handleProfilePhotoUpload(e.target.files[0])} />
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="card">
+        <div className="flex items-center gap-6">
+          <div className="relative group">
+            <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center">
+              {profilePhoto ? (
+                <img src={profilePhoto.startsWith('http') ? profilePhoto : `${API_BASE}/${profilePhoto}`} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-white text-3xl font-bold">{form.groupName?.charAt(0)?.toUpperCase() || 'G'}</span>
+              )}
+            </div>
+            <button onClick={() => profileInputRef.current?.click()} disabled={uploading} className="absolute -bottom-1 -right-1 p-2 bg-pink-600 text-white rounded-xl shadow-lg hover:bg-pink-700 transition-colors">
+              <FiCamera size={14} />
+            </button>
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Group Photo</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Click the camera icon to upload a photo</p>
+          </div>
+        </div>
+      </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="card">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Basic Information</h2>

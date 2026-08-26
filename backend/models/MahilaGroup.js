@@ -18,6 +18,7 @@ const mahilaGroupSchema = new mongoose.Schema({
   sellingMethod: { type: String, default: '' },
   problems: { type: String, default: '' },
   supportNeeded: { type: String, default: '' },
+  profilePhoto: { type: String, default: '' },
   productImages: [{ type: String }],
   status: { type: String, enum: ['draft', 'submitted', 'approved', 'rejected'], default: 'draft' },
   approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

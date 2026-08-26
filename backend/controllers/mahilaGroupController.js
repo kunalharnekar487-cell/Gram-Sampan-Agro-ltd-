@@ -79,6 +79,19 @@ exports.deleteImage = async (req, res) => {
   }
 };
 
+exports.uploadProfilePhoto = async (req, res) => {
+  try {
+    const group = await MahilaGroup.findOne({ userId: req.user.id });
+    if (!group) return res.status(404).json({ success: false, message: 'Group not found' });
+    if (!req.files || !req.files.length) return res.status(400).json({ success: false, message: 'No file uploaded' });
+    group.profilePhoto = req.files[0].path;
+    await group.save();
+    res.json({ success: true, data: group });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 exports.getGroups = async (req, res) => {
   try {
     const { page = 1, limit = 10, village, taluka, district, status, search } = req.query;

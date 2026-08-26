@@ -91,6 +91,19 @@ exports.deletePhoto = async (req, res) => {
   }
 };
 
+exports.uploadProfilePhoto = async (req, res) => {
+  try {
+    const farmer = await Farmer.findOne({ userId: req.user.id });
+    if (!farmer) return res.status(404).json({ success: false, message: 'Farmer not found' });
+    if (!req.files || !req.files.length) return res.status(400).json({ success: false, message: 'No file uploaded' });
+    farmer.profilePhoto = req.files[0].path;
+    await farmer.save();
+    res.json({ success: true, data: farmer });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 exports.getFarmers = async (req, res) => {
   try {
     const { page = 1, limit = 10, village, taluka, district, status, search } = req.query;

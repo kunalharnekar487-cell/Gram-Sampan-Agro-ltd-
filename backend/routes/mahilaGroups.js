@@ -1,5 +1,5 @@
 const express = require('express');
-const { getProfile, updateProfile, saveDraft, submitProfile, uploadImages, deleteImage, getGroups, getGroupById, approveGroup, rejectGroup } = require('../controllers/mahilaGroupController');
+const { getProfile, updateProfile, saveDraft, submitProfile, uploadImages, uploadProfilePhoto, deleteImage, getGroups, getGroupById, approveGroup, rejectGroup } = require('../controllers/mahilaGroupController');
 const { protect, authorize } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
@@ -10,6 +10,7 @@ router.put('/profile', protect, authorize('mahila'), updateProfile);
 router.post('/draft', protect, authorize('mahila'), saveDraft);
 router.post('/submit', protect, authorize('mahila'), submitProfile);
 router.post('/upload-images', protect, authorize('mahila'), upload.array('images', 10), uploadImages);
+router.post('/upload-profile-photo', protect, authorize('mahila'), upload.array('images', 1), uploadProfilePhoto);
 router.delete('/delete-image', protect, authorize('mahila'), deleteImage);
 router.get('/', protect, authorize('crp', 'admin'), getGroups);
 router.get('/:id', protect, authorize('crp', 'admin'), getGroupById);

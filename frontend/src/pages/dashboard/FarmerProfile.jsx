@@ -19,11 +19,13 @@ export default function FarmerProfile() {
   });
   const [farmPhotos, setFarmPhotos] = useState([]);
   const [productPhotos, setProductPhotos] = useState([]);
+  const [profilePhoto, setProfilePhoto] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const farmInputRef = useRef(null);
   const productInputRef = useRef(null);
+  const profileInputRef = useRef(null);
 
   useEffect(() => { fetchProfile(); }, []);
 
@@ -31,10 +33,11 @@ export default function FarmerProfile() {
     try {
       const { data } = await API.get('/farmers/profile');
       if (data.data) {
-        const { farmPhotos: fp, productPhotos: pp, status, approvedBy, approvedAt, isProfileComplete, createdAt, updatedAt, __v, _id, userId, ...fields } = data.data;
+        const { farmPhotos: fp, productPhotos: pp, profilePhoto: ppUrl, status, approvedBy, approvedAt, isProfileComplete, createdAt, updatedAt, __v, _id, userId, ...fields } = data.data;
         setForm(prev => ({ ...prev, ...fields }));
         setFarmPhotos(fp || []);
         setProductPhotos(pp || []);
+        setProfilePhoto(ppUrl || '');
       }
     } catch (err) { toast.error('Failed to load profile'); }
     finally { setLoading(false); }
@@ -75,6 +78,19 @@ export default function FarmerProfile() {
     } catch (err) { toast.error('Failed to remove photo'); }
   };
 
+  const handleProfilePhotoUpload = async (file) => {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('photos', file);
+      const { data } = await API.post('/farmers/upload-profile-photo', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      setProfilePhoto(data.data.profilePhoto);
+      toast.success('Profile photo updated!');
+    } catch (err) { toast.error(err.response?.data?.message || 'Upload failed'); }
+    finally { setUploading(false); }
+  };
+
   const toggleCrop = (field, crop) => {
     setForm(prev => ({
       ...prev,
@@ -93,6 +109,28 @@ export default function FarmerProfile() {
           <button onClick={() => handleSubmit('submit')} disabled={saving} className="btn-primary text-sm"><FiSend className="inline mr-1" />{saving ? 'Saving...' : 'Submit'}</button>
         </div>
       </div>
+
+      <input ref={profileInputRef} type="file" accept="image/*" className="hidden" onChange={e => handleProfilePhotoUpload(e.target.files[0])} />
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="card">
+        <div className="flex items-center gap-6">
+          <div className="relative group">
+            <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
+              {profilePhoto ? (
+                <img src={profilePhoto.startsWith('http') ? profilePhoto : `${API_BASE}/${profilePhoto}`} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-white text-3xl font-bold">{form.fullName?.charAt(0)?.toUpperCase() || 'F'}</span>
+              )}
+            </div>
+            <button onClick={() => profileInputRef.current?.click()} disabled={uploading} className="absolute -bottom-1 -right-1 p-2 bg-primary-600 text-white rounded-xl shadow-lg hover:bg-primary-700 transition-colors">
+              <FiCamera size={14} />
+            </button>
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Profile Photo</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Click the camera icon to upload a photo</p>
+          </div>
+        </div>
+      </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="card">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Personal Information</h2>

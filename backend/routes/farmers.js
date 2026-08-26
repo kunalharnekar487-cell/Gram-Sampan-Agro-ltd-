@@ -1,5 +1,5 @@
 const express = require('express');
-const { getProfile, updateProfile, saveDraft, submitProfile, uploadPhotos, deletePhoto, getFarmers, getFarmerById, approveFarmer, rejectFarmer } = require('../controllers/farmerController');
+const { getProfile, updateProfile, saveDraft, submitProfile, uploadPhotos, uploadProfilePhoto, deletePhoto, getFarmers, getFarmerById, approveFarmer, rejectFarmer } = require('../controllers/farmerController');
 const { protect, authorize } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
@@ -10,6 +10,7 @@ router.put('/profile', protect, authorize('farmer'), updateProfile);
 router.post('/draft', protect, authorize('farmer'), saveDraft);
 router.post('/submit', protect, authorize('farmer'), submitProfile);
 router.post('/upload-photos', protect, authorize('farmer'), upload.array('photos', 10), uploadPhotos);
+router.post('/upload-profile-photo', protect, authorize('farmer'), upload.array('photos', 1), uploadProfilePhoto);
 router.delete('/delete-photo', protect, authorize('farmer'), deletePhoto);
 router.get('/', protect, authorize('crp', 'admin'), getFarmers);
 router.get('/:id', protect, authorize('crp', 'admin'), getFarmerById);

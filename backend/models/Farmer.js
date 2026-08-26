@@ -20,6 +20,7 @@ const farmerSchema = new mongoose.Schema({
   villagePopulation: { type: String, default: '' },
   farmingProblems: { type: String, default: '' },
   supportRequired: { type: String, default: '' },
+  profilePhoto: { type: String, default: '' },
   farmPhotos: [{ type: String }],
   productPhotos: [{ type: String }],
   status: { type: String, enum: ['draft', 'submitted', 'approved', 'rejected'], default: 'draft' },
