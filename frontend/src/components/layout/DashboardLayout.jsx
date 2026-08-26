@@ -45,7 +45,7 @@ export default function DashboardLayout() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <Sidebar collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} />
       <div className={`transition-all duration-300 ${sidebarCollapsed ? 'ml-[72px]' : 'ml-[260px]'}`}>
-        <header className="sticky top-0 z-20 glass border-b border-gray-100 dark:border-gray-800 px-6 py-4 flex items-center justify-between">
+        <header className="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 border-b border-gray-100 dark:border-gray-800 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button onClick={() => setSidebarCollapsed(!sidebarCollapsed)} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 lg:hidden"><FiMenu size={20} /></button>
             <h1 className="text-lg font-semibold text-gray-900 dark:text-white capitalize">{user?.role} Dashboard</h1>
