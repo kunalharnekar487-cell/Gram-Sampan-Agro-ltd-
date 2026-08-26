@@ -57,7 +57,7 @@ exports.uploadImages = async (req, res) => {
   try {
     const group = await MahilaGroup.findOne({ userId: req.user.id });
     if (!group) return res.status(404).json({ success: false, message: 'Group not found' });
-    const urls = (req.files || []).map(f => f.path);
+    const urls = (req.files || []).map(f => `uploads/${f.filename}`);
     group.productImages = [...group.productImages, ...urls];
     await group.save();
     res.json({ success: true, data: group });
@@ -84,7 +84,7 @@ exports.uploadProfilePhoto = async (req, res) => {
     const group = await MahilaGroup.findOne({ userId: req.user.id });
     if (!group) return res.status(404).json({ success: false, message: 'Group not found' });
     if (!req.files || !req.files.length) return res.status(400).json({ success: false, message: 'No file uploaded' });
-    group.profilePhoto = req.files[0].path;
+    group.profilePhoto = `uploads/${req.files[0].filename}`;
     await group.save();
     res.json({ success: true, data: group });
   } catch (error) {

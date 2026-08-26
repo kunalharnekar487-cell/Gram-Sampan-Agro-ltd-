@@ -59,7 +59,7 @@ exports.uploadPhotos = async (req, res) => {
     if (!farmer) return res.status(404).json({ success: false, message: 'Farmer not found' });
 
     const files = req.files || [];
-    const urls = files.map(f => f.path);
+    const urls = files.map(f => `uploads/${f.filename}`);
 
     if (req.body.type === 'farm') {
       farmer.farmPhotos = [...farmer.farmPhotos, ...urls];
@@ -96,7 +96,7 @@ exports.uploadProfilePhoto = async (req, res) => {
     const farmer = await Farmer.findOne({ userId: req.user.id });
     if (!farmer) return res.status(404).json({ success: false, message: 'Farmer not found' });
     if (!req.files || !req.files.length) return res.status(400).json({ success: false, message: 'No file uploaded' });
-    farmer.profilePhoto = req.files[0].path;
+    farmer.profilePhoto = `uploads/${req.files[0].filename}`;
     await farmer.save();
     res.json({ success: true, data: farmer });
   } catch (error) {
